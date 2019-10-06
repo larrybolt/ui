@@ -1,18 +1,21 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
-import "./index.css";
+import { ConnectedRouter } from "connected-react-router";
+import { Switch, Route } from "react-router-dom";
 import "typeface-roboto";
-import { createStore } from "redux";
-import App from "./App";
-import * as serviceWorker from "./serviceWorker";
-import { rootReducer } from "./reducer";
-
-const store = createStore(rootReducer);
+import * as serviceWorker from "./utils/serviceWorker";
+import store from "./store";
+import { history } from "./utils/history";
+import Home from "./pages/home";
 
 ReactDOM.render(
   <Provider store={store}>
-    <App title="test" />
+    <ConnectedRouter history={history}>
+      <Switch>
+        <Route path="/" exact component={Home} />
+      </Switch>
+    </ConnectedRouter>
   </Provider>,
   document.getElementById("root"),
 );
