@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { State } from "../store";
 import { actions } from "../store/account";
@@ -7,6 +7,9 @@ import { actions } from "../store/account";
 const Home: FC = () => {
   const accounts = useSelector((state: State) => state.account.accounts);
   const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(actions.request());
+  }, []);
 
   return (
     <>

@@ -1,15 +1,29 @@
 import { ImmerReducer, createActionCreators, createReducerFunction } from "immer-reducer";
+import { Epic } from "redux-observable";
+import { ajax } from "rxjs/ajax";
+import { mergeMap, map } from "rxjs/operators";
 import Account from "../models/account";
+// import { getAll } from "../api";
 
 export interface State {
   readonly accounts: Account[];
+  readonly requesting: boolean;
 }
 
 const initialState: State = {
   accounts: [{ id: "1", name: "first account", balance: 0, currency: "EUR" }],
+  requesting: false,
 };
 
 class AccountReducer extends ImmerReducer<State> {
+  request() {
+    this.draftState.requesting = true;
+  }
+
+  loaded(accounts: Account[]) {
+    this.draftState.accounts = accounts;
+  }
+
   add(account: Account) {
     this.draftState.accounts.push(account);
   }
@@ -22,21 +36,9 @@ class AccountReducer extends ImmerReducer<State> {
 export const actions = createActionCreators(AccountReducer);
 export const reducer = createReducerFunction(AccountReducer, initialState);
 
-// import { ActionType, createStandardAction, getType } from "typesafe-actions";
-// export const actions = {
-//   add: createStandardAction("ACCOUNT/add")<Account>(),
-//   delete: createStandardAction("ACCOUNT/delete")<string>(),
-// };
-// export type AccountActions = ActionType<typeof actions>;
-// export function reducer(state = initialState, action: AccountActions): AccountState {
-//   switch (action.type) {
-//     case getType(actions.add):
-//       state.accounts.push(action.payload);
-//       break;
-//     case getType(actions.delete):
-//       state.accounts.filter(account => account.id !== action.payload);
-//       break;
-//     default:
-//   }
-//   return state;
-// }
+export const requestAccountsEpic: Epic<typeof actions.request> = action$ =>
+  action$
+    .ofType(actions.request.type)
+    .pipe(
+      mergeMap(() => ajax.getJSON(`http://localhost:3000/accounts`).pipe(map(response => actions.loaded(response)))),
+    );
